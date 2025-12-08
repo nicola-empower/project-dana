@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meal Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        /* Using Inter font as a clean default */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; 
+        }
+        
+        /* Custom colors based on screenshot */
+        .text-header-blue { color: #3b82f6; } /* Approx */
+        .bg-button-green { background-color: #10b981; } /* Approx */
+        .text-dark-gray { color: #374151; }
+        .border-green-teal { border-color: #34d399; } /* Approx */
+        .text-green-teal { color: #34d399; }
+        
+        /* Utility styles for the interface */
+        .tab-btn.active {
+            border-bottom: 2px solid #10b981; 
+            color: #10b981;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+
+    <div id="meal-planner-decoy" class="container mx-auto max-w-7xl">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-dark-gray mb-2">AI Meal Planner</h1>
+            <p class="text-lg text-gray-600 max-w-4xl mx-auto">
+                Transform your available ingredients into delicious meals with AI-powered recipe suggestions. Simply input what you have, and we'll create personalized meal plans that match your dietary preferences.
+            </p>
+        </header>
+
+        <main class="flex flex-col lg:flex-row gap-8">
+            
+            <div class="w-full lg:w-2/3 flex flex-col gap-6">
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h2 class="text-xl font-semibold flex items-center gap-2 text-green-teal mb-4">
+                        <i data-lucide="leaf" class="w-5 h-5"></i>
+                        Dietary Preferences
+                    </h2>
+                    <div class="flex flex-wrap gap-2 text-sm">
+                        <span class="bg-gray-200 text-dark-gray py-1 px-3 rounded-full cursor-pointer hover:bg-gray-300">Vegetarian</span>
+                        <span class="bg-gray-200 text-dark-gray py-1 px-3 rounded-full cursor-pointer hover:bg-gray-300">Gluten-Free</span>
+                        <span class="bg-gray-200 text-dark-gray py-1 px-3 rounded-full cursor-pointer hover:bg-gray-300">Dairy-Free</span>
+                        <span class="bg-gray-200 text-dark-gray py-1 px-3 rounded-full cursor-pointer hover:bg-gray-300">Nut Allergy</span>
+                        <span class="bg-gray-200 text-dark-gray py-1 px-3 rounded-full cursor-pointer hover:bg-gray-300">Low Carb</span>
+                        <span class="bg-gray-200 text-dark-gray py-1 px-3 rounded-full cursor-pointer hover:bg-gray-300">Vegan</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h2 class="text-xl font-semibold text-dark-gray mb-4">What's in your kitchen?</h2>
+                    
+                    <div class="flex border-b border-gray-200 mb-4">
+                        <button class="tab-btn active text-dark-gray py-2 px-4 mr-4 transition-colors" data-tab="cupboard">Cupboard</button>
+                        <button class="tab-btn text-gray-500 py-2 px-4 mr-4 transition-colors" data-tab="fridge">Fridge</button>
+                        <button class="tab-btn text-gray-500 py-2 px-4 transition-colors" data-tab="freezer">Freezer</button>
+                    </div>
+
+                    <div class="flex items-center mb-4">
+                        <input type="text" placeholder="Add cupboard ingredients..." class="w-full p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-teal">
+                        <button class="bg-button-green text-white font-bold py-3 px-4 rounded-r-lg hover:bg-green-600 transition-colors">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 text-sm text-gray-600 border-t pt-4">
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Rice</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Pasta</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Flour</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Sugar</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Salt</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Olive Oil</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Vinegar</span>
+                        <span class="bg-gray-100 py-1 px-3 rounded-full cursor-pointer hover:bg-gray-200">Spices</span>
+                    </div>
+                </div>
+                
+                <button class="bg-button-green text-white text-lg font-semibold py-4 rounded-xl shadow-md hover:bg-green-600 transition-colors">
+                    Generate Meal Plan
+                </button>
+            </div>
+            
+            <div class="w-full lg:w-1/3 flex flex-col gap-6">
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h2 class="text-xl font-semibold text-dark-gray mb-4">Quick Stats</h2>
+                    <div class="space-y-2 text-gray-700">
+                        <p class="flex justify-between"><span>Total Ingredients:</span> <span class="font-medium text-dark-gray">0</span></p>
+                        <p class="flex justify-between"><span>Active Preferences:</span> <span class="font-medium text-dark-gray">0</span></p>
+                        <p class="flex justify-between"><span>Generated Recipes:</span> <span class="font-medium text-dark-gray">0</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h2 class="text-xl font-semibold text-dark-gray mb-4">Recent Activity</h2>
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-teal"></i>
+                            <span>Added 5 ingredients to fridge</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="settings" class="w-4 h-4 text-gray-500"></i>
+                            <span>Updated dietary preferences</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="lightbulb" class="w-4 h-4 text-yellow-500"></i>
+                            <span>Generated 3 new recipes</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <footer class="mt-8 text-sm text-gray-500 text-center">
+                    <a href="#" id="return-to-app-trigger" class="hover:underline">Contact Support</a>
+                </footer>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+        
+        // This file is the decoy. The return logic is in index.html
+    </script>
+</body>
+</html>

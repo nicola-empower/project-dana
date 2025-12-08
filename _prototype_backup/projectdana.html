@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project DANA - Portfolio Demo</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        /* Using Inter font as a clean default */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Light grey background for the page */
+        }
+        
+        /* Custom gradient from the screenshot */
+        .header-gradient {
+            background: linear-gradient(90deg, rgba(200, 210, 230, 0.4) 0%, rgba(180, 190, 210, 0.2) 100%);
+        }
+
+        /* Custom colors from the screenshot */
+        .text-brand-purple { color: #6d5f99; } /* Approx color */
+        .text-brand-teal { color: #5db09d; } /* Approx color */
+        .bg-brand-button { background-color: #7c77aa; } /* Approx color */
+        .hover\:bg-brand-button-hover:hover { background-color: #6a6693; }
+        .bg-brand-action { background-color: #c99c8f; } /* Approx color */
+        .hover\:bg-brand-action-hover:hover { background-color: #b58a7e; }
+        .border-brand-action { border-color: #c99c8f; }
+
+        /* Icon styling */
+        .icon-sm {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        /* Page transition (simple fade) */
+        .page-content {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .page-content.active {
+            display: block; /* Shown when active */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal styles */
+        .modal {
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Active nav link style */
+        .nav-link.active {
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #6d5f99;
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+
+        /* --- NEW STYLES --- */
+
+        /* Quick Exit Button */
+        .quick-exit-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .quick-exit-button:hover {
+            transform: scale(1.05);
+            background-color: #c0392b; /* Darker red on hover */
+        }
+
+        /* Decoy Page */
+        .decoy-google-logo {
+            width: 272px;
+            height: 92px;
+            margin-top: -60px; /* Pull up */
+        }
+
+        /* Archive Filter Buttons */
+        .archive-filter-btn {
+            transition: all 0.2s ease;
+        }
+        .archive-filter-btn.active {
+            background-color: #7c77aa; /* brand-button color */
+            color: white;
+            font-weight: 500;
+        }
+        
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- ======================= -->
+    <!-- == DANA APP CONTAINER == -->
+    <!-- ======================= -->
+    <!-- We wrap the entire app in this container so we can hide it -->
+    <div id="dana-app" class="app-container">
+        
+        <!-- NEW: Quick Exit Button -->
+        <button id="quick-exit-trigger" class="quick-exit-button fixed bottom-5 right-5 z-[100] bg-red-600 text-white font-medium py-3 px-4 rounded-full shadow-lg flex items-center gap-2">
+            <i data-lucide="shield-off" class="w-5 h-5"></i>
+            <span class="hidden md:block">Quick Exit</span>
+        </button>
+
+        <div class="container mx-auto max-w-7xl p-4 md:p-8">
+            
+            <!-- Header & Navigation -->
+            <header class="flex flex-col md:flex-row justify-between items-center pb-4 mb-4 border-b">
+                <h1 class="text-3xl font-bold text-brand-purple mb-4 md:mb-0">
+                    Project DANA
+                </h1>
+                <nav class="flex space-x-6">
+                    <a href="#" class="nav-link text-gray-600 hover:text-gray-900 py-2" data-page="dashboard">Dashboard</a>
+                    <a href="#" class="nav-link text-gray-600 hover:text-gray-900 py-2" data-page="reports">Reports</a>
+                    <a href="#" class="nav-link text-gray-600 hover:text-gray-900 py-2" data-page="safety-plan">Safety Plan</a>
+                </nav>
+            </header>
+
+            <!-- Main Content Area -->
+            <main>
+
+                <!-- ======================= -->
+                <!-- == DASHBOARD PAGE (Default) == -->
+                <!-- ======================= -->
+                <div id="dashboard-page" class="page-content active">
+
+                    <!-- Hero Banner -->
+                    <div class="header-gradient p-8 rounded-xl shadow-sm mb-8">
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-2">Your Personal Evidence Archive</h2>
+                        <p class="text-lg text-gray-600 max-w-3xl">
+                            Document incidents securely, organise evidence chronologically and build a comprehensive record that supports your journey toward justice and healing.
+                        </p>
+                    </div>
+
+                    <!-- Main dashboard layout (2/3 + 1/3) -->
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        
+                        <!-- Left Column (Main Content) -->
+                        <div class="w-full lg:w-2/3 flex flex-col gap-8">
+
+                            <!-- Document New Incident Card -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">Document New Incident</h3>
+                                    <p class="text-gray-600">Create a detailed record of an incident with date, description, and supporting evidence.</p>
+                                </div>
+                                <button id="add-incident-trigger" class="bg-brand-button text-white font-medium py-2 px-5 rounded-lg shadow-sm hover:bg-brand-button-hover transition-colors">
+                                    Add Incident
+                                </button>
+                            </div>
+
+                            <!-- Documented Events Card -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-semibold text-gray-800">Documented Events</h3>
+                                    <button id="full-archive-trigger" class="flex items-center gap-2 text-gray-600 bg-gray-100 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                                        <i data-lucide="archive" class="icon-sm"></i>
+                                        <span>Your archive</span>
+                                    </button>
+                                </div>
+
+                                <!-- Example Incident (Preview) -->
+                                <div class="border border-gray-200 rounded-lg p-5 relative">
+                                    <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                                        <i data-lucide="more-horizontal" class="icon-sm"></i>
+                                    </button>
+                                    <h4 class="text-lg font-semibold text-gray-900">Threatening phone call received</h4>
+                                    <p class="text-sm text-gray-500 mb-3">March 15, 2025</p>
+                                    <p class="text-gray-700 mb-4 line-clamp-2">
+                                        Multiple threatening messages received via phone and text throughout the day. Saved voicemails and screenshots as evidence.
+                                    </p>
+                                    <span class="text-xs font-medium bg-green-100 text-green-800 py-1 px-3 rounded-full">
+                                        Coercive Control
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column (Sidebar) -->
+                        <div class="w-full lg:w-1/3 flex flex-col gap-8">
+                            
+                            <!-- Quick Actions Card -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                                <div class="flex flex-col space-y-3">
+                                    <button id="emergency-resources-trigger" class="w-full bg-brand-action text-white font-medium py-3 px-4 rounded-lg shadow-sm hover:bg-brand-action-hover transition-colors flex items-center justify-center gap-2">
+                                        <i data-lucide="shield-alert" class="icon-sm"></i>
+                                        <span>Emergency Resources</span>
+                                    </button>
+                                    <button class="nav-link w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2" data-page="safety-plan">
+                                        <i data-lucide="file-check" class="icon-sm"></i>
+                                        <span>Safety Plan</span>
+                                    </button>
+                                    <button class="nav-link w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2" data-page="reports">
+                                        <i data-lucide="download" class="icon-sm"></i>
+                                        <span>Export Report</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Incident Categories Card -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-4">Incident Categories</h3>
+                                <div class="flex flex-col space-y-2">
+                                    <div class="flex justify-between items-center text-gray-700 p-2 rounded-lg hover:bg-gray-50">
+                                        <span>Coercive Control</span>
+                                        <span class="text-sm bg-gray-200 text-gray-600 font-medium w-6 h-6 flex items-center justify-center rounded-full">1</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-gray-700 p-2 rounded-lg hover:bg-gray-50">
+                                        <span>Financial Abuse</span>
+                                        <span class="text-sm bg-gray-200 text-gray-600 font-medium w-6 h-6 flex items-center justify-center rounded-full">0</span>
+                                    </div>
+                                    <!-- Add more categories here -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ======================= -->
+                <!-- == REPORTS PAGE == -->
+                <!-- ======================= -->
+                <div id="reports-page" class="page-content">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-4">Export Reports</h2>
+                        <p class="text-lg text-gray-600 mb-6">This is where the user would filter and export their documented incidents into a court-ready format.</p>
+                        <div class="bg-gray-100 p-6 rounded-lg border border-gray-200">
+                            <h4 class="font-semibold text-gray-700 mb-2">Filtering Options (Mockup)</h4>
+                            <p class="text-gray-600">Include filters here for date range, incident category, and evidence type.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================= -->
+                <!-- == SAFETY PLAN PAGE == -->
+                <!-- ======================= -->
+                <div id="safety-plan-page" class="page-content">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-4">My Safety Plan</h2>
+                        <p class="text-lg text-gray-600 mb-6">This section would contain a guided wizard to help a user create a personal safety plan.</p>
+                        <div class="bg-gray-100 p-6 rounded-lg border border-gray-200">
+                            <h4 class="font-semibold text-gray-700 mb-2">Plan Sections (Mockup)</h4>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li>Safe contacts</li>
+                                <li>Safe places to go</li>
+                                <li>Important documents to take</li>
+                                <li>Code word for friends/family</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================= -->
+                <!-- == ADD INCIDENT MODAL == -->
+                <!-- ======================= -->
+                <div id="add-incident-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <!-- Modal Backdrop -->
+                    <div class="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+                    
+                    <!-- Modal Content -->
+                    <div class="modal-content bg-white p-8 rounded-xl shadow-xl border border-gray-200 max-w-2xl w-full z-10">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-semibold text-gray-800">Document New Incident</h2>
+                            <button class="modal-close text-gray-500 hover:text-gray-800">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        <form class="space-y-6" onsubmit="return false;"> <!-- Prevent form submission -->
+                            <div>
+                                <label for="incident-date" class="block text-sm font-medium text-gray-700 mb-1">Date of Incident</label>
+                                <input type="date" id="incident-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-brand-purple focus:border-brand-purple">
+                            </div>
+                            
+                            <div>
+                                <label for="incident-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                <select id="incident-category" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-brand-purple focus:border-brand-purple">
+                                    <option>Coercive Control</option>
+                                    <option>Financial Abuse</option>
+                                    <option>Physical Abuse</option>
+                                    <option>Stalking</option>
+                                    <option>Threats</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="incident-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea id="incident-description" rows="6" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-brand-purple focus:border-brand-purple" placeholder="Describe what happened in as much detail as you remember..."></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Upload Evidence</label>
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                    <div class="space-y-1 text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                        <div class="flex text-sm text-gray-600">
+                                            <p class="pl-1">Click to upload photos, videos, or audio files</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500">This is a demo. File upload is disabled.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-3 pt-4">
+                                <button type="button" class="modal-close bg-gray-100 text-gray-700 font-medium py-2 px-5 rounded-lg hover:bg-gray-200 transition-colors">
+                                    Cancel
+                                </button>
+                                <!-- This button just closes the modal for the demo -->
+                                <button type="button" class="modal-close bg-brand-button text-white font-medium py-2 px-5 rounded-lg shadow-sm hover:bg-brand-button-hover transition-colors">
+                                    Save Incident
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ======================= -->
+                <!-- == EMERGENCY RESOURCES MODAL == -->
+                <!-- ======================= -->
+                <div id="emergency-resources-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <!-- Modal Backdrop -->
+                    <div class="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+                    
+                    <!-- Modal Content -->
+                    <div class="modal-content bg-white p-8 rounded-xl shadow-xl border border-gray-200 max-w-lg w-full z-10">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-semibold text-red-700">Emergency Resources</h2>
+                            <button class="modal-close text-gray-500 hover:text-gray-800">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        <p class="text-lg text-gray-600 mb-6">If you are in immediate danger, please call 999. These numbers are for support services within Scotland.</p>
+                        <div class="space-y-4">
+                            <div class="bg-red-100 border border-red-300 p-4 rounded-lg flex items-center justify-between">
+                                <div>
+                                    <span class="font-semibold text-red-800">Police or Ambulance</span>
+                                    <span class="block text-sm text-red-700">If you are in immediate danger.</span>
+                                </div>
+                                <span class="font-bold text-red-900 text-xl">999</span>
+                            </div>
+                            <div class="bg-blue-100 border border-blue-300 p-4 rounded-lg flex items-center justify-between">
+                                 <div>
+                                    <span class="font-semibold text-blue-800">Police (Non-Emergency)</span>
+                                    <span class="block text-sm text-blue-700">To report incidents that are not an emergency.</span>
+                                </div>
+                                <span class="font-bold text-blue-900 text-xl">101</span>
+                            </div>
+                            <div class="bg-gray-100 border border-gray-300 p-4 rounded-lg">
+                                <span class="font-semibold text-gray-800">Scotland's Domestic Abuse & Forced Marriage Helpline</span>
+                                <span class="block font-bold text-brand-purple text-lg mt-1">0800 027 1234</span>
+                                <span class="block text-sm text-gray-600 mt-1">24/7 support and information.</span>
+                            </div>
+                             <div class="bg-gray-100 border border-gray-300 p-4 rounded-lg">
+                                <span class="font-semibold text-gray-800">Rape Crisis Scotland</span>
+                                <span class="block font-bold text-brand-purple text-lg mt-1">08088 01 03 02</span>
+                                <span class="block text-sm text-gray-600 mt-1">Daily, 5pm - midnight.</span>
+                            </div>
+                             <div class="bg-gray-100 border border-gray-300 p-4 rounded-lg">
+                                <span class="font-semibold text-gray-800">Breathing Space</span>
+                                <span class="block font-bold text-brand-purple text-lg mt-1">0800 83 85 87</span>
+                                <span class="block text-sm text-gray-600 mt-1">For mental health support, anxiety, or depression.</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                             <button type="button" class="modal-close bg-brand-button text-white font-medium py-2 px-5 rounded-lg shadow-sm hover:bg-brand-button-hover transition-colors">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================= -->
+                <!-- == FULL ARCHIVE MODAL == -->
+                <!-- ======================= -->
+                <div id="full-archive-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <!-- Modal Backdrop -->
+                    <div class="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+                    
+                    <!-- Modal Content -->
+                    <div class="modal-content bg-white p-8 rounded-xl shadow-xl border border-gray-200 max-w-3xl w-full z-10 max-h-[80vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-4 sticky top-0 bg-white py-4 border-b">
+                            <h2 class="text-3xl font-semibold text-gray-800">Full Incident Archive</h2>
+                            <button class="modal-close text-gray-500 hover:text-gray-800">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- NEW: Archive Filter Buttons -->
+                        <div id="archive-filter-controls" class="flex flex-wrap gap-2 mb-6">
+                            <button class="archive-filter-btn active bg-gray-100 text-gray-700 py-2 px-4 rounded-full" data-filter="all">All</button>
+                            <button class="archive-filter-btn bg-gray-100 text-gray-700 py-2 px-4 rounded-full" data-filter="control">Coercive Control</button>
+                            <button class="archive-filter-btn bg-gray-100 text-gray-700 py-2 px-4 rounded-full" data-filter="financial">Financial Abuse</button>
+                            <button class="archive-filter-btn bg-gray-100 text-gray-700 py-2 px-4 rounded-full" data-filter="stalking">Stalking</button>
+                        </div>
+
+                        <!-- List of Incidents -->
+                        <div id="incident-list" class="space-y-4">
+                            
+                            <!-- Incident 1: data-category="control" -->
+                            <div class="incident-item border border-gray-200 rounded-lg p-5 relative" data-category="control">
+                                <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                                    <i data-lucide="more-horizontal" class="icon-sm"></i>
+                                </button>
+                                <h4 class="text-lg font-semibold text-gray-900">Threatening phone call received</h4>
+                                <p class="text-sm text-gray-500 mb-3">March 15, 2025</p>
+                                <p class="text-gray-700 mb-4">
+                                    Multiple threatening messages received via phone and text throughout the day. Saved voicemails and screenshots as evidence.
+                                </p>
+                                <span class="text-xs font-medium bg-green-100 text-green-800 py-1 px-3 rounded-full">
+                                    Coercive Control
+                                </span>
+                            </div>
+
+                            <!-- Incident 2: data-category="financial" -->
+                            <div class="incident-item border border-gray-200 rounded-lg p-5 relative" data-category="financial">
+                                <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                                    <i data-lucide="more-horizontal" class="icon-sm"></i>
+                                </button>
+                                <h4 class="text-lg font-semibold text-gray-900">Prevented from accessing bank account</h4>
+                                <p class="text-sm text-gray-500 mb-3">March 12, 2025</p>
+                                <p class="text-gray-700 mb-4">
+                                    Logged in to find my password had been changed. When I asked about it, I was told I "don't need to worry about money." Was not given the new password.
+                                </p>
+                                <span class="text-xs font-medium bg-blue-100 text-blue-800 py-1 px-3 rounded-full">
+                                    Financial Abuse
+                                </span>
+                            </div>
+
+                            <!-- Incident 3: data-category="stalking" -->
+                            <div class="incident-item border border-gray-200 rounded-lg p-5 relative" data-category="stalking">
+                                <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                                    <i data-lucide="more-horizontal" class="icon-sm"></i>
+                                </button>
+                                <h4 class="text-lg font-semibold text-gray-900">Followed to friend's house</h4>
+                                <p class="text-sm text-gray-500 mb-3">March 10, 2025</p>
+                                <p class="text-gray-700 mb-4">
+                                    Went to visit a friend and saw his car parked down the street. He later text me "Hope you had a nice time at Sarah's," which confirmed he had followed me.
+                                </p>
+                                <span class="text-xs font-medium bg-yellow-100 text-yellow-800 py-1 px-3 rounded-full">
+                                    Stalking
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+
+    <!-- ======================= -->
+    <!-- == NEW: DECOY PAGE == -->
+    <!-- ======================= -->
+    <div id="decoy-page" class="hidden app-container h-screen w-screen bg-white flex items-center justify-center p-4">
+        
+        <div class="text-center max-w-lg w-full">
+            
+            <!-- Dev Note for your portfolio -->
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-8 relative" role="alert">
+                <h4 class="font-bold">Portfolio Dev Note:</h4>
+                <p>This is the simulated "Decoy Page" for the Quick Exit feature. In the real app, this provides instant plausible deniability if a user is forced to show their device.</p>
+                <p class="mt-2 text-sm">To return to the app, click the "Privacy" link in the footer below.</p>
+            </div>
+
+            <!-- Google Logo SVG -->
+            <svg class="decoy-google-logo mx-auto mb-8" viewBox="0 0 352 124" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M42.846 64.71c0-1.84-.16-3.62-.47-5.34H17.65v10.1h14.13c-.61 3.26-2.4 6.04-5.11 7.92v6.56h8.44c4.93-4.54 7.77-11.3 7.77-19.24z" fill="#4285F4"></path><path d="M17.65 85.9c6.9 0 12.7-2.3 16.92-6.23l-8.44-6.56c-2.3 1.54-5.2 2.45-8.48 2.45-6.52 0-12.04-4.4-14.02-10.27H.89v6.78c4.1 8.16 12.42 13.83 21.6 13.83h-4.84z" fill="#34A853"></path><path d="M8.47 62.06c-.41-1.23-.64-2.53-.64-3.89 0-1.36.23-2.66.64-3.89V47.5H.89C.32 49.9.03 52.4.03 54.99c0 2.59.29 5.09.86 7.58l7.58-6.01z" fill="#FBBC05"></path><path d="M17.65 43.19c3.73 0 7.13 1.28 9.8 3.86l7.5-7.48C30.34 31.9 24.55 29 17.65 29c-9.18 0-17.5 5.67-21.6 13.83l7.58 6.01c1.98-5.87 7.5-10.27 14.02-10.27z" fill="#EA4335"></path></svg>
+            
+            <!-- Search Bar -->
+            <div class="relative w-full border border-gray-200 rounded-full hover:shadow-md focus-within:shadow-md transition-shadow">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                </div>
+                <input type="text" class="w-full py-3 px-12 rounded-full outline-none" disabled>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                    <i data-lucide="mic" class="w-5 h-5 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Search Buttons -->
+            <div class="flex gap-4 justify-center mt-7">
+                <button class="bg-gray-100 text-gray-700 py-2 px-4 rounded-md text-sm hover:shadow-sm hover:border-gray-300 border border-transparent">Google Search</button>
+                <button class="bg-gray-100 text-gray-700 py-2 px-4 rounded-md text-sm hover:shadow-sm hover:border-gray-300 border border-transparent">I'm Feeling Lucky</button>
+            </div>
+        </div>
+        
+        <!-- Fake Google Footer -->
+        <footer class="absolute bottom-0 w-full bg-gray-100 p-4 text-sm text-gray-600">
+            <div class="max-w-7xl mx-auto flex justify-center space-x-6">
+                <a href="#" class="hover:underline">About</a>
+                <a href="#" class="hover:underline">Advertising</a>
+                <a href="#" class="hover:underline">Business</a>
+                <!-- This is the hidden return button -->
+                <a href="#" id="return-to-app-trigger" class="hover:underline">Privacy</a>
+            </div>
+        </footer>
+    </div>
+
+
+    <script>
+        // Wait for the DOM to be fully loaded before running any script
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // --- Page Navigation Logic ---
+            const allPages = document.querySelectorAll('.page-content');
+            const allNavLinks = document.querySelectorAll('.nav-link');
+
+            function showPage(pageId) {
+                // Hide all pages
+                allPages.forEach(page => {
+                    page.classList.remove('active');
+                });
+
+                // Show the target page
+                const targetPage = document.getElementById(pageId + '-page');
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+
+                // Update active state on nav links
+                allNavLinks.forEach(link => {
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                // Scroll to top
+                window.scrollTo(0, 0);
+            }
+
+            // Add click listeners to all page nav links
+            allNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault(); // Stop the link from navigating
+                    const pageId = e.currentTarget.dataset.page;
+                    if (pageId) {
+                        showPage(pageId);
+                    }
+                });
+            });
+
+            // Set the default page (Dashboard)
+            showPage('dashboard');
+
+
+            // --- Modal Logic ---
+            
+            // Get all modals
+            const addIncidentModal = document.getElementById('add-incident-modal');
+            const emergencyModal = document.getElementById('emergency-resources-modal');
+            const archiveModal = document.getElementById('full-archive-modal');
+            const allModals = [addIncidentModal, emergencyModal, archiveModal];
+
+            // Get all trigger buttons
+            const addIncidentTrigger = document.getElementById('add-incident-trigger');
+            const emergencyTrigger = document.getElementById('emergency-resources-trigger');
+            const archiveTrigger = document.getElementById('full-archive-trigger');
+
+            // Add open listeners
+            addIncidentTrigger.addEventListener('click', () => addIncidentModal.classList.remove('hidden'));
+            emergencyTrigger.addEventListener('click', () => emergencyModal.classList.remove('hidden'));
+            archiveTrigger.addEventListener('click', () => archiveModal.classList.remove('hidden'));
+
+            // Add close listeners
+            allModals.forEach(modal => {
+                const closeButtons = modal.querySelectorAll('.modal-close');
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        modal.classList.add('hidden');
+                    });
+                });
+                const overlay = modal.querySelector('.modal-overlay');
+                if (overlay) {
+                    overlay.addEventListener('click', () => {
+                        modal.classList.add('hidden');
+                    });
+                }
+            });
+
+            // --- NEW: Quick Exit Logic ---
+            const danaApp = document.getElementById('dana-app');
+            const decoyPage = document.getElementById('decoy-page');
+            const quickExitTrigger = document.getElementById('quick-exit-trigger');
+            const returnToAppTrigger = document.getElementById('return-to-app-trigger');
+
+            quickExitTrigger.addEventListener('click', () => {
+                danaApp.classList.add('hidden');
+                decoyPage.classList.remove('hidden');
+            });
+
+            returnToAppTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                decoyPage.classList.add('hidden');
+                danaApp.classList.remove('hidden');
+            });
+
+
+            // --- NEW: Archive Filtering Logic ---
+            const filterControls = document.getElementById('archive-filter-controls');
+            const filterButtons = filterControls.querySelectorAll('.archive-filter-btn');
+            const incidentList = document.getElementById('incident-list');
+            const allIncidents = incidentList.querySelectorAll('.incident-item');
+
+            filterControls.addEventListener('click', (e) => {
+                // Only act if a button was clicked
+                if (!e.target.matches('.archive-filter-btn')) {
+                    return;
+                }
+
+                const clickedButton = e.target;
+                const filterValue = clickedButton.dataset.filter;
+
+                // Update button active state
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                clickedButton.classList.add('active');
+
+                // Show/hide incidents
+                allIncidents.forEach(item => {
+                    if (filterValue === 'all' || item.dataset.category === filterValue) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
+

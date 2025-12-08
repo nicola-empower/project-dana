@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefAI / Project DANA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['DM Serif Display', 'serif'],
+                    },
+                    colors: {
+                        'chef-green': '#047857', 
+                        'chef-accent': '#34d399',
+                        'dana-purple': '#6d5f99',
+                        'dana-text': '#2d3748',
+                        'dana-danger': '#e11d48',
+                        'love-bg': '#fff1f2',
+                        'love-accent': '#fb7185',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'pulse-subtle': 'pulseSubtle 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(40px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { -webkit-font-smoothing: antialiased; }
+        .secure-bg {
+            background-color: #f3f4f6;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: 100% 100%;
+        }
+        .duress-bg {
+            background-color: #fff1f2;
+            background-image: radial-gradient(#fce7f3 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .view-container { transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; }
+        .hidden-view { display: none !important; opacity: 0; pointer-events: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Loading Dots */
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+    </style>
+</head>
+<body class="h-screen overflow-hidden relative font-sans text-gray-800">
+
+    <!-- HINT -->
+    <div id="portfolio-hint" class="fixed bottom-0 left-0 w-full bg-gray-900/90 backdrop-blur text-white text-center py-3 z-[9999] text-sm font-medium border-t border-gray-800 transition-transform duration-300">
+        <span class="opacity-75">Demo Codes: </span> 
+        <span class="text-chef-accent font-bold mx-2">"Blueberry Pancakes"</span> (Secure Vault) | 
+        <span class="text-rose-400 font-bold mx-2">"Burnt Toast"</span> (Love Bomb/Duress Log)
+        <button onclick="document.getElementById('portfolio-hint').style.transform='translateY(100%)'" class="ml-4 text-xs underline hover:text-white">Close</button>
+    </div>
+
+    <!-- VIEW 1: DECOY (ChefAI) -->
+    <div id="decoy-view" class="view-container w-full h-full overflow-y-auto bg-gray-50">
+        <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-200/50">
+            <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-chef-green">
+                    <i data-lucide="chef-hat" class="w-7 h-7"></i>
+                    <span class="font-serif text-2xl tracking-tight font-medium text-gray-900">ChefAI</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-sm font-medium text-gray-500 hover:text-chef-green hidden md:block">Saved Recipes</a>
+                    <div class="w-9 h-9 bg-gradient-to-br from-chef-green to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-emerald-200">JD</div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="relative bg-white pb-16 pt-12 lg:pt-20">
+            <div class="max-w-4xl mx-auto px-6 text-center">
+                <h1 class="text-5xl md:text-6xl font-serif text-gray-900 mb-6 leading-tight">
+                    Master your kitchen <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-chef-green to-emerald-400">with AI magic.</span>
+                </h1>
+                <p class="text-lg text-gray-500 mb-10 max-w-2xl mx-auto font-light">
+                    Input your ingredients, set your preferences, and let our engine generate the perfect meal plan for you in seconds.
+                </p>
+
+                <div class="relative max-w-xl mx-auto group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-300 to-chef-green rounded-full blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+                    <form id="magic-search-form" onsubmit="handleMagicSearch(event)" class="relative bg-white rounded-full shadow-xl flex items-center p-2 border border-gray-100">
+                        <i data-lucide="search" class="ml-4 text-gray-400 w-5 h-5"></i>
+                        <input type="text" id="magic-input" placeholder="What ingredients do you have? (e.g. 'Eggs')..." class="flex-1 px-4 py-3 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-lg">
+                        <button type="submit" class="bg-chef-green hover:bg-emerald-800 text-white px-8 py-3 rounded-full font-medium transition-all transform hover:scale-[1.02] active:scale-95 shadow-md">Generate</button>
+                    </form>
+                </div>
+                <div id="search-error" class="hidden mt-4 bg-red-50 text-red-600 px-4 py-2 rounded-lg inline-block text-sm font-medium animate-pulse">
+                    No recipes found. Try "Blueberry Pancakes".
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-6 py-12">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="font-serif text-3xl text-gray-900">Trending Now</h2>
+                <a href="#" class="text-chef-green font-medium hover:underline">View all</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+                    <div class="h-56 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">🔥 Popular</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-gray-900 mb-2 group-hover:text-chef-green transition-colors">Seared Salmon Bowl</h3>
+                        <div class="flex justify-between items-center text-gray-500 text-sm"><span>25 mins</span><span>480 kcal</span></div>
+                    </div>
+                </div>
+                <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+                    <div class="h-56 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-gray-900 mb-2 group-hover:text-chef-green transition-colors">Rustic Tomato Soup</h3>
+                        <div class="flex justify-between items-center text-gray-500 text-sm"><span>40 mins</span><span>320 kcal</span></div>
+                    </div>
+                </div>
+                <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+                    <div class="h-56 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">🌱 Vegan</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-gray-900 mb-2 group-hover:text-chef-green transition-colors">Avocado Toast Deluxe</h3>
+                        <div class="flex justify-between items-center text-gray-500 text-sm"><span>10 mins</span><span>290 kcal</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: THE VAULT (Project DANA) -->
+    <div id="secure-view" class="view-container hidden-view w-full h-full secure-bg flex flex-col md:flex-row">
+        <!-- QUICK EXIT -->
+        <button onclick="triggerQuickExit()" class="fixed bottom-6 right-6 z-[100] bg-dana-danger hover:bg-red-700 text-white px-6 py-4 rounded-full shadow-2xl shadow-red-900/40 flex items-center gap-3 font-bold transition-all hover:scale-105 active:scale-95 group">
+            <i data-lucide="log-out" class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500"></i>
+            <span class="hidden md:inline tracking-wide">QUICK EXIT</span>
+        </button>
+
+        <!-- Sidebar -->
+        <aside class="hidden md:flex w-72 flex-col p-6 pr-0">
+            <div class="glass-panel h-full rounded-2xl flex flex-col p-6">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 rounded-xl bg-dana-purple text-white flex items-center justify-center shadow-lg shadow-dana-purple/30">
+                        <i data-lucide="shield" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-xl text-gray-800 tracking-tight leading-none">Project DANA</h1>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Secure Archive</span>
+                    </div>
+                </div>
+                <nav class="space-y-2 flex-1">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-dana-purple/10 text-dana-purple font-semibold transition-all text-left"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</button>
+                    <button onclick="switchTab('log')" id="nav-log" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-white/50 hover:text-gray-800 font-medium transition-all text-left"><i data-lucide="pen-tool" class="w-5 h-5"></i> New Entry</button>
+                    <button onclick="switchTab('child')" id="nav-child" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-white/50 hover:text-gray-800 font-medium transition-all text-left"><i data-lucide="baby" class="w-5 h-5"></i> Child Welfare</button>
+                    <button onclick="switchTab('archive')" id="nav-archive" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-white/50 hover:text-gray-800 font-medium transition-all text-left"><i data-lucide="folder-open" class="w-5 h-5"></i> Evidence Locker</button>
+                    <button onclick="switchTab('safety')" id="nav-safety" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-white/50 hover:text-gray-800 font-medium transition-all text-left"><i data-lucide="life-buoy" class="w-5 h-5"></i> Safety Plan</button>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-6 h-full overflow-hidden flex flex-col">
+            <div class="md:hidden mb-4 flex justify-between items-center glass-panel p-4 rounded-xl">
+                <span class="font-bold text-gray-800 flex items-center gap-2"><i data-lucide="shield" class="w-4 h-4 text-dana-purple"></i> DANA</span>
+                <button class="p-2 bg-gray-100 rounded-lg" onclick="document.querySelector('aside').classList.toggle('hidden')"><i data-lucide="menu" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto rounded-2xl hide-scrollbar pb-24 md:pb-0">
+                
+                <!-- DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content animate-slide-up space-y-6">
+                    <div class="glass-panel p-8 rounded-3xl relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h2 class="text-3xl font-serif font-bold text-gray-800 mb-2">Course of Conduct</h2>
+                            <p class="text-gray-500 mb-6 max-w-md text-sm">
+                                Your logs show a developing pattern. This timeline is crucial evidence for proving "Course of Conduct" under Scottish Law.
+                            </p>
+                            <div class="flex gap-3">
+                                <div class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> 3 Incidents this week</div>
+                                <div class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> Escalation detected</div>
+                            </div>
+                        </div>
+                        <i data-lucide="activity" class="absolute -right-6 -bottom-6 w-64 h-64 text-dana-purple/5 z-0"></i>
+                    </div>
+
+                    <!-- TIMELINE -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> Recent Pattern</h3>
+                        <div class="space-y-0" id="timeline-container">
+                            <!-- Items injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHILD WELFARE (NEW!) -->
+                <div id="tab-child" class="tab-content hidden animate-slide-up max-w-4xl mx-auto">
+                    <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl shadow-black/5 mb-6">
+                        <div class="px-8 py-6 border-b border-gray-100 bg-white/50 flex justify-between items-center">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <i data-lucide="baby" class="w-5 h-5 text-dana-purple"></i>
+                                Child Welfare & Contact Log
+                            </h2>
+                            <span class="text-xs font-bold bg-red-50 text-red-600 px-2 py-1 rounded">Family Court Ready</span>
+                        </div>
+                        
+                        <div class="p-8 space-y-8">
+                            
+                            <!-- Section 1: The Child's Voice -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                    <i data-lucide="message-circle" class="w-4 h-4 text-dana-purple"></i> The Child's Voice (Quotes)
+                                </label>
+                                <p class="text-xs text-gray-500 mb-2">Record exactly what the child said upon return. Do not interpret, just quote.</p>
+                                <textarea id="child-quote" class="w-full h-24 p-4 bg-white/60 border border-white rounded-xl focus:ring-2 focus:ring-dana-purple/50 outline-none resize-none text-sm shadow-inner" placeholder='"Dad said you aren&apos;t a good mum..."'></textarea>
+                            </div>
+
+                            <!-- Section 2: Post-Contact Checklist (TOGGLE BUTTONS) -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                                    <i data-lucide="clipboard-check" class="w-4 h-4 text-dana-purple"></i> Post-Contact Checklist
+                                </label>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <label class="cursor-pointer relative group">
+                                        <input type="checkbox" class="peer sr-only" value="Hungry">
+                                        <div class="p-3 rounded-lg bg-white/60 border border-transparent text-gray-600 text-sm font-medium text-center transition-all peer-checked:bg-dana-purple peer-checked:text-white peer-checked:shadow-md peer-checked:border-dana-purple hover:bg-white">
+                                            Returned Hungry
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative group">
+                                        <input type="checkbox" class="peer sr-only" value="Dirty">
+                                        <div class="p-3 rounded-lg bg-white/60 border border-transparent text-gray-600 text-sm font-medium text-center transition-all peer-checked:bg-dana-purple peer-checked:text-white peer-checked:shadow-md peer-checked:border-dana-purple hover:bg-white">
+                                            Unhygienic/Dirty
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative group">
+                                        <input type="checkbox" class="peer sr-only" value="Tired">
+                                        <div class="p-3 rounded-lg bg-white/60 border border-transparent text-gray-600 text-sm font-medium text-center transition-all peer-checked:bg-dana-purple peer-checked:text-white peer-checked:shadow-md peer-checked:border-dana-purple hover:bg-white">
+                                            Exhausted
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative group">
+                                        <input type="checkbox" class="peer sr-only" value="Upset">
+                                        <div class="p-3 rounded-lg bg-white/60 border border-transparent text-gray-600 text-sm font-medium text-center transition-all peer-checked:bg-dana-purple peer-checked:text-white peer-checked:shadow-md peer-checked:border-dana-purple hover:bg-white">
+                                            Crying/Upset
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative group">
+                                        <input type="checkbox" class="peer sr-only" value="Silent">
+                                        <div class="p-3 rounded-lg bg-white/60 border border-transparent text-gray-600 text-sm font-medium text-center transition-all peer-checked:bg-dana-purple peer-checked:text-white peer-checked:shadow-md peer-checked:border-dana-purple hover:bg-white">
+                                            Withdrawn/Silent
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative group">
+                                        <input type="checkbox" class="peer sr-only" value="Aggressive">
+                                        <div class="p-3 rounded-lg bg-white/60 border border-transparent text-gray-600 text-sm font-medium text-center transition-all peer-checked:bg-dana-purple peer-checked:text-white peer-checked:shadow-md peer-checked:border-dana-purple hover:bg-white">
+                                            Aggressive
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Incident Details -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Incident / Concern Details</label>
+                                <textarea id="child-details" class="w-full h-32 p-4 bg-white/60 border border-white rounded-xl focus:ring-2 focus:ring-dana-purple/50 outline-none resize-none text-sm shadow-inner" placeholder="Describe specific concerns (e.g., drug use, being left alone, alienation comments)..."></textarea>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button onclick="processChildEntry()" class="bg-dana-purple text-white px-6 py-2 rounded-xl font-bold shadow-lg hover:bg-opacity-90 transition-colors flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Log for Family Court
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW ENTRY (AI + MANUAL EDIT) -->
+                <div id="tab-log" class="tab-content hidden animate-slide-up max-w-4xl mx-auto">
+                     <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl shadow-black/5">
+                        <div class="px-8 py-6 border-b border-gray-100 bg-white/50">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-5 h-5 text-dana-purple"></i>
+                                AI Evidence Logger
+                            </h2>
+                        </div>
+                        <div class="p-8">
+                            
+                            <!-- Step 1: Input -->
+                            <div id="input-section">
+                                <!-- METADATA ROW -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date & Time of Incident</label>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="log-date" class="w-full p-3 bg-white/60 border border-white rounded-xl focus:ring-2 focus:ring-dana-purple/50 outline-none text-sm">
+                                            <input type="time" id="log-time" class="w-full p-3 bg-white/60 border border-white rounded-xl focus:ring-2 focus:ring-dana-purple/50 outline-none text-sm">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Location</label>
+                                        <div class="relative">
+                                            <i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i>
+                                            <input type="text" id="log-location" placeholder="e.g. Kitchen, Tesco Car Park" class="w-full p-3 pl-9 bg-white/60 border border-white rounded-xl focus:ring-2 focus:ring-dana-purple/50 outline-none text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                                <textarea id="raw-input" class="w-full h-48 p-5 bg-white/60 border border-white rounded-xl focus:ring-2 focus:ring-dana-purple/50 focus:bg-white outline-none resize-none text-gray-700 leading-relaxed shadow-inner mb-4" placeholder="Write exactly what happened. Don't worry about legal terms..."></textarea>
+                                <div class="flex justify-end">
+                                    <button onclick="processEntry()" class="bg-dana-purple text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:translate-y-[-2px] transition-transform flex items-center gap-2">
+                                        Analyze & Encrypt <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Processing -->
+                            <div id="processing-state" class="hidden py-12 flex flex-col items-center justify-center">
+                                <div class="loader-dots block relative w-20 h-5 mb-6">
+                                    <div class="absolute top-0 w-3 h-3 rounded-full bg-dana-purple"></div>
+                                    <div class="absolute top-0 w-3 h-3 rounded-full bg-dana-purple"></div>
+                                    <div class="absolute top-0 w-3 h-3 rounded-full bg-dana-purple"></div>
+                                    <div class="absolute top-0 w-3 h-3 rounded-full bg-dana-purple"></div>
+                                </div>
+                                <p class="text-sm text-gray-500">Identifying legal categories...</p>
+                            </div>
+
+                            <!-- Step 3: Review & Confirm -->
+                            <div id="result-state" class="hidden animate-fade-in">
+                                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6 flex items-start gap-3">
+                                    <div class="bg-indigo-100 p-1 rounded-full text-indigo-600 mt-0.5"><i data-lucide="eye" class="w-4 h-4"></i></div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-indigo-900">Review Analysis</h4>
+                                        <p class="text-xs text-indigo-700">You are the expert of your own experience. Correct the tags if needed.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <!-- Raw Column -->
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Raw Evidence</span>
+                                        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm flex-1">
+                                            <div class="flex gap-2 mb-2 text-xs text-gray-400 font-bold">
+                                                <span id="review-date"></span> • <span id="review-location"></span>
+                                            </div>
+                                            <p id="display-raw" class="text-gray-600 italic leading-relaxed"></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Legal Column -->
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-dana-purple uppercase tracking-wider mb-2">Legal Translation</span>
+                                        <div class="p-4 bg-white rounded-xl border border-dana-purple/20 shadow-sm flex-1">
+                                            <p id="display-legal" class="text-sm text-gray-800 font-medium leading-relaxed mb-4"></p>
+                                            
+                                            <!-- Tag Manager -->
+                                            <div class="border-t border-gray-100 pt-3">
+                                                <label class="text-xs font-bold text-gray-400 block mb-2">Categories (AI Detected + Your Edits)</label>
+                                                <div id="tags-container" class="flex flex-wrap gap-2 mb-3"></div>
+                                                
+                                                <div class="flex gap-2">
+                                                    <select id="manual-category" class="flex-1 text-xs p-2 bg-gray-50 border border-gray-200 rounded-lg outline-none">
+                                                        <option value="">+ Add Category...</option>
+                                                        <option value="Child Endangerment">Child Endangerment</option>
+                                                        <option value="Parental Alienation">Parental Alienation</option>
+                                                        <option value="Child Neglect">Child Neglect</option>
+                                                        <option value="Coercive Control">Coercive Control</option>
+                                                        <option value="Financial Abuse">Financial Abuse</option>
+                                                        <option value="Physical Assault">Physical Assault</option>
+                                                        <option value="Sexual Violence">Sexual Violence</option>
+                                                        <option value="Stalking">Stalking</option>
+                                                        <option value="Threats to Kill">Threats to Kill</option>
+                                                        <option value="Property Damage">Property Damage</option>
+                                                    </select>
+                                                    <button onclick="addManualTag()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-lg text-xs font-bold">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-4">
+                                    <button onclick="resetForm()" class="text-gray-500 font-medium text-sm hover:text-gray-800">Discard</button>
+                                    <button onclick="saveEntry()" class="bg-dana-purple text-white px-6 py-2 rounded-xl font-bold shadow-lg hover:bg-opacity-90 transition-colors flex items-center gap-2">
+                                        <i data-lucide="save" class="w-4 h-4"></i> Save to Log
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVIDENCE LOCKER -->
+                <div id="tab-archive" class="tab-content hidden animate-slide-up">
+                    <div class="flex justify-between items-end mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Evidence Locker</h2>
+                        <button onclick="generateMailto()" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 flex items-center gap-2 shadow-sm">
+                            <i data-lucide="mail" class="w-4 h-4"></i> Email Report
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                         <div class="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer group">
+                            <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-3 group-hover:scale-110 transition-transform"><i data-lucide="mic" class="w-6 h-6"></i></div>
+                            <span class="text-xs font-bold text-gray-700 truncate w-full">threat_nov12.mp3</span><span class="text-[10px] text-gray-400">12 Nov • 2.4MB</span>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer group">
+                            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-3 group-hover:scale-110 transition-transform"><i data-lucide="image" class="w-6 h-6"></i></div>
+                            <span class="text-xs font-bold text-gray-700 truncate w-full">bruise_arm.jpg</span><span class="text-[10px] text-gray-400">10 Nov • 4.1MB</span>
+                        </div>
+                         <div class="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer group">
+                            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-3 group-hover:scale-110 transition-transform"><i data-lucide="image" class="w-6 h-6"></i></div>
+                            <span class="text-xs font-bold text-gray-700 truncate w-full">screenshot_txt.png</span><span class="text-[10px] text-gray-400">08 Nov • 1.2MB</span>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-center min-h-[140px]"><span class="text-xs text-gray-400">Files are encrypted<br>at rest.</span></div>
+                    </div>
+                </div>
+
+                <!-- SAFETY PLAN -->
+                <div id="tab-safety" class="tab-content hidden animate-slide-up">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Safety Plan</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-2xl">
+                            <h3 class="font-bold text-gray-700 mb-4">Emergency Contacts</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between bg-red-50 p-3 rounded-xl border border-red-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-red-500 text-white p-2 rounded-lg"><i data-lucide="phone" class="w-4 h-4"></i></div>
+                                        <div><p class="text-sm font-bold text-red-900">Police Emergency</p><p class="text-xs text-red-700">Immediate Danger</p></div>
+                                    </div>
+                                    <span class="text-xl font-black text-red-600 pr-2">999</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-blue-100 text-blue-600 p-2 rounded-lg"><i data-lucide="phone" class="w-4 h-4"></i></div>
+                                        <div><p class="text-sm font-bold text-gray-800">Police Non-Emergency</p><p class="text-xs text-gray-500">Report past incidents</p></div>
+                                    </div>
+                                    <span class="text-lg font-bold text-gray-600 pr-2">101</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-purple-50 p-3 rounded-xl border border-purple-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-purple-100 text-purple-600 p-2 rounded-lg"><i data-lucide="heart-handshake" class="w-4 h-4"></i></div>
+                                        <div><p class="text-sm font-bold text-purple-900">Scotland Domestic Abuse</p><p class="text-xs text-purple-700">24/7 Helpline</p></div>
+                                    </div>
+                                    <span class="text-sm font-bold text-purple-600 pr-2">0800 027 1234</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-2xl">
+                            <h3 class="font-bold text-gray-700 mb-4">Trusted Friend</h3>
+                            <form onsubmit="event.preventDefault(); alert('Contact Saved Encrypted');" class="space-y-4">
+                                <div><label class="text-xs font-bold text-gray-500 uppercase">Name</label><input type="text" class="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-dana-purple" placeholder="e.g. Sarah"></div>
+                                <div><label class="text-xs font-bold text-gray-500 uppercase">Safe Email</label><input type="email" class="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-dana-purple" placeholder="sarah@gmail.com"></div>
+                                <button class="w-full bg-dana-purple text-white py-2 rounded-lg font-bold text-sm hover:bg-opacity-90">Save Contact</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VIEW 3: DURESS -->
+    <div id="duress-view" class="view-container hidden-view w-full h-full duress-bg flex flex-col overflow-y-auto">
+        <nav class="p-6 flex justify-between items-center">
+            <h1 class="font-serif text-2xl text-rose-800">My Journal</h1>
+            <button onclick="triggerQuickExit()" class="text-rose-400 hover:text-rose-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </nav>
+        <main class="flex-1 max-w-2xl mx-auto w-full p-6">
+            <div class="bg-white/80 p-8 rounded-3xl shadow-sm border border-rose-100 mb-8 text-center">
+                <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500"><i data-lucide="heart" class="w-8 h-8 fill-rose-200"></i></div>
+                <h2 class="text-2xl font-serif text-gray-800 mb-2">Gratitude Log</h2>
+                <p class="text-gray-500">Focusing on the good moments.</p>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider"><span>Date Night</span><span>Yesterday</span></div>
+                    <p class="text-gray-600 italic">"He surprised me with flowers and we went to that Italian place. He was so sweet all night."</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider"><span>Apology</span><span>3 days ago</span></div>
+                    <p class="text-gray-600 italic">"He said sorry about the argument. He promised it wouldn't happen again and bought me chocolate."</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- LOGIC -->
+    <script>
+        lucide.createIcons();
+
+        const decoyView = document.getElementById('decoy-view');
+        const secureView = document.getElementById('secure-view');
+        const duressView = document.getElementById('duress-view');
+        const magicInput = document.getElementById('magic-input');
+        const searchError = document.getElementById('search-error');
+
+        // --- STATE MANAGEMENT ---
+        // Initial Mock Data
+        let incidents = [
+            { date: 'Today, 09:30 AM', category: 'Physical Threat', text: 'Threw the remote at the wall near my head...', color: 'bg-red-50 text-red-600', marker: 'bg-red-600' },
+            { date: 'Yesterday, Pay Day', category: 'Financial Control', text: 'Demanded login details for my personal account immediately after my salary hit...', color: 'bg-indigo-50 text-indigo-600', marker: 'bg-indigo-400' },
+            { date: '2 days ago', category: 'Stalking', text: 'Texted me asking who I was with at Tesco, attached photo of my car...', color: 'bg-amber-50 text-amber-600', marker: 'bg-amber-400' }
+        ];
+
+        let tempEntry = null; // Stores current analysing entry
+
+        // Set Default Date/Time
+        document.getElementById('log-date').valueAsDate = new Date();
+        const now = new Date();
+        document.getElementById('log-time').value = now.toTimeString().substring(0,5);
+
+        // --- RENDER FUNCTIONS ---
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+            
+            // Sort incidents by date if they were real Date objects, 
+            // but for demo strings we'll just render order
+            incidents.forEach(inc => {
+                const item = document.createElement('div');
+                item.className = 'relative pl-8 pb-6 border-l-2 border-dana-purple/20 last:border-0 last:pb-0';
+                item.innerHTML = `
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full ${inc.marker} border-2 border-white shadow-sm"></div>
+                    <div class="bg-white/60 p-4 rounded-xl border border-white/50 hover:bg-white transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold ${inc.color} px-2 py-0.5 rounded">${inc.category}</span>
+                            <span class="text-xs text-gray-400 font-medium">${inc.date}</span>
+                        </div>
+                        <p class="text-sm text-gray-700 font-medium">"${inc.text}"</p>
+                        ${inc.location ? `<div class="mt-2 flex items-center gap-1 text-xs text-gray-400"><i data-lucide="map-pin" class="w-3 h-3"></i> ${inc.location}</div>` : ''}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+            lucide.createIcons(); // Refresh icons
+        }
+
+        // --- ENTRY LOGIC ---
+        function processEntry() {
+            const raw = document.getElementById('raw-input').value;
+            const dateVal = document.getElementById('log-date').value;
+            const timeVal = document.getElementById('log-time').value;
+            const locVal = document.getElementById('log-location').value;
+
+            if(!raw) return;
+
+            document.getElementById('input-section').classList.add('hidden');
+            document.getElementById('processing-state').classList.remove('hidden');
+
+            setTimeout(() => {
+                // Mock AI Analysis
+                const analysis = analyzeText(raw);
+                
+                // Store in temp state for editing
+                tempEntry = {
+                    raw: raw,
+                    legal: analysis.summary,
+                    tags: analysis.tags,
+                    date: dateVal,
+                    time: timeVal,
+                    location: locVal
+                };
+
+                // Render Review UI
+                document.getElementById('review-date').innerText = `${dateVal || 'Date N/A'} • ${timeVal || 'Time N/A'}`;
+                document.getElementById('review-location').innerText = locVal || 'Location Unknown';
+                
+                document.getElementById('display-raw').innerText = `"${raw}"`;
+                document.getElementById('display-legal').innerText = analysis.summary;
+                renderTags(tempEntry.tags);
+
+                document.getElementById('processing-state').classList.add('hidden');
+                document.getElementById('result-state').classList.remove('hidden');
+            }, 1500);
+        }
+
+        // CHILD LOGIC
+        function processChildEntry() {
+            const quote = document.getElementById('child-quote').value;
+            const details = document.getElementById('child-details').value;
+            
+            // Gather Checkboxes
+            let checks = [];
+            document.querySelectorAll('#tab-child input[type=checkbox]:checked').forEach(box => {
+                checks.push(box.value);
+            });
+
+            if(!quote && !details && checks.length === 0) return;
+
+            // Combine into text for timeline
+            let text = "";
+            if(quote) text += `Child said: "${quote}" `;
+            if(checks.length > 0) text += `\nObserved: ${checks.join(', ')} `;
+            if(details) text += `\nDetails: ${details}`;
+
+            // Mock AI for child
+            let category = "Child Welfare";
+            if(quote.toLowerCase().includes("dad said")) category = "Parental Alienation";
+            if(checks.includes("Hungry") || checks.includes("Dirty")) category = "Child Neglect";
+            if(details.toLowerCase().includes("weed") || details.toLowerCase().includes("drunk")) category = "Substance Exposure";
+
+            incidents.unshift({
+                date: 'Just now',
+                category: category,
+                text: text,
+                color: 'bg-orange-50 text-orange-700',
+                marker: 'bg-orange-500',
+                location: 'Post-Contact'
+            });
+
+            renderTimeline();
+            
+            // Reset Inputs
+            document.getElementById('child-quote').value = "";
+            document.getElementById('child-details').value = "";
+            document.querySelectorAll('#tab-child input[type=checkbox]').forEach(box => box.checked = false);
+            
+            switchTab('dashboard');
+        }
+
+        function analyzeText(text) {
+            let tags = [];
+            let summary = "Subject reported an incident involving ";
+            const lower = text.toLowerCase();
+
+            if (lower.includes('hit') || lower.includes('threw')) {
+                tags.push('Physical Assault');
+                summary += "physical aggression. ";
+            }
+            if (lower.includes('money') || lower.includes('bank')) {
+                tags.push('Financial Abuse');
+                summary += "restriction of financial resources. ";
+            }
+            if (lower.includes('text') || lower.includes('where')) {
+                tags.push('Stalking');
+                summary += "unwanted monitoring and communication. ";
+            }
+            if(tags.length === 0) {
+                 tags.push('Coercive Control');
+                 summary += "behavior consistent with coercive control. ";
+            }
+            return { tags, summary };
+        }
+
+        function renderTags(tags) {
+            const container = document.getElementById('tags-container');
+            container.innerHTML = '';
+            tags.forEach(tag => {
+                const t = document.createElement('span');
+                t.className = `text-[10px] font-bold px-2 py-1 rounded uppercase bg-dana-purple/10 text-dana-purple border border-dana-purple/20`;
+                t.innerText = tag;
+                container.appendChild(t);
+            });
+        }
+
+        function addManualTag() {
+            const select = document.getElementById('manual-category');
+            const val = select.value;
+            if (val && !tempEntry.tags.includes(val)) {
+                tempEntry.tags.push(val);
+                renderTags(tempEntry.tags);
+            }
+            select.value = "";
+        }
+
+        function saveEntry() {
+            // Format display date from input
+            let displayDate = "Just now";
+            if(tempEntry.date) {
+                const d = new Date(tempEntry.date);
+                displayDate = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                if(tempEntry.time) displayDate += `, ${tempEntry.time}`;
+            }
+
+            // Add to global state
+            incidents.unshift({
+                date: displayDate,
+                category: tempEntry.tags[0], 
+                text: tempEntry.raw,
+                color: 'bg-purple-50 text-purple-700',
+                marker: 'bg-purple-600',
+                location: tempEntry.location
+            });
+
+            // Refresh Dashboard
+            renderTimeline();
+            
+            // Reset UI
+            resetForm();
+            switchTab('dashboard');
+        }
+
+        function resetForm() {
+            document.getElementById('raw-input').value = '';
+            document.getElementById('log-location').value = '';
+            // Keep date/time as is for ease of multi-entry
+            document.getElementById('input-section').classList.remove('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+            tempEntry = null;
+        }
+
+        // --- CORE APP LOGIC ---
+        function handleMagicSearch(e) {
+            e.preventDefault();
+            const query = magicInput.value.toLowerCase().trim();
+            
+            [decoyView, secureView, duressView].forEach(v => {
+                v.classList.add('hidden-view');
+                v.style.opacity = '0';
+            });
+
+            if (query.includes('blueberry')) {
+                secureView.classList.remove('hidden-view');
+                setTimeout(() => secureView.style.opacity = '1', 50);
+                renderTimeline(); 
+                magicInput.value = '';
+                searchError.classList.add('hidden');
+            } else if (query.includes('burnt toast')) {
+                duressView.classList.remove('hidden-view');
+                setTimeout(() => duressView.style.opacity = '1', 50);
+                magicInput.value = '';
+                searchError.classList.add('hidden');
+            } else {
+                decoyView.classList.remove('hidden-view');
+                decoyView.style.opacity = '1';
+                searchError.classList.remove('hidden');
+                setTimeout(() => searchError.classList.add('hidden'), 3000);
+            }
+        }
+
+        function triggerQuickExit() {
+            [secureView, duressView].forEach(v => {
+                v.classList.add('hidden-view');
+                v.style.opacity = '0';
+            });
+            decoyView.classList.remove('hidden-view');
+            setTimeout(() => decoyView.style.opacity = '1', 50);
+            
+            // Clear forms but don't reset date/time completely to annoy user
+            document.getElementById('raw-input').value = '';
+            switchTab('dashboard');
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('animate-slide-up');
+            });
+            const target = document.getElementById('tab-' + id);
+            if(target) {
+                target.classList.remove('hidden');
+                void target.offsetWidth;
+                target.classList.add('animate-slide-up');
+            }
+            const navIds = ['dashboard', 'log', 'child', 'archive', 'safety'];
+            navIds.forEach(navId => {
+                const btn = document.getElementById('nav-' + navId);
+                if(btn) {
+                    if (navId === id) {
+                        btn.classList.remove('text-gray-500', 'hover:bg-white/50');
+                        btn.classList.add('bg-dana-purple/10', 'text-dana-purple');
+                    } else {
+                        btn.classList.add('text-gray-500', 'hover:bg-white/50');
+                        btn.classList.remove('bg-dana-purple/10', 'text-dana-purple');
+                    }
+                }
+            });
+        }
+
+        function generateMailto() {
+            const subject = encodeURIComponent("Recipe Collection Backup");
+            
+            let bodyText = "EVIDENCE LOG EXPORT - CONFIDENTIAL\n\n";
+            
+            incidents.forEach((inc, index) => {
+                bodyText += `${index + 1}. ${inc.date} - ${inc.category}\n`;
+                if(inc.location) bodyText += `Location: ${inc.location}\n`;
+                bodyText += `"${inc.text}"\n\n`;
+            });
+
+            bodyText += "--\nGenerated by Project DANA";
+
+            window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+        }
+
+        // Init
+        renderTimeline();
+    </script>
+</body>
+</html>
