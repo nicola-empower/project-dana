@@ -6,7 +6,7 @@ import {
     LogOut, Shield, LayoutDashboard, PenTool, Baby, FolderOpen, LifeBuoy, Menu,
     AlertCircle, Calendar, Activity, Clock, Save, MapPin, Eye, Mic, Image, Phone, HeartHandshake,
     MessageCircle, ClipboardCheck, Sparkles, ArrowRight, Upload, UploadCloud, Video, FileText, X, Lock,
-    Globe, Users, Plus, Trash2, User, Mail, ChevronDown, Check
+    Globe, Users, Plus, Trash2, User, Mail, ChevronDown, Check, ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -366,6 +366,48 @@ function LogEntryTab({ onSave, onAddFile }: { onSave: (data: any) => void, onAdd
                 category: category
             });
         }
+    };
+
+    const toggleTag = (tag: string) => {
+        setAnalysis(prev => {
+            if (!prev) return null;
+            const currentTags = prev.selectedTags || [];
+            const newTags = currentTags.includes(tag)
+                ? currentTags.filter(t => t !== tag)
+                : [...currentTags, tag];
+            return { ...prev, selectedTags: newTags };
+        });
+    };
+
+    const handleSave = () => {
+        if (!analysis) return;
+
+        let color = 'bg-gray-100 text-gray-800';
+        let marker = 'bg-gray-500';
+
+        // Simple category color mapping
+        if (analysis.category.includes('Physical')) { color = 'bg-red-50 text-red-600'; marker = 'bg-red-600'; }
+        else if (analysis.category.includes('Financial')) { color = 'bg-indigo-50 text-indigo-600'; marker = 'bg-indigo-400'; }
+        else if (analysis.category.includes('Stalking')) { color = 'bg-amber-50 text-amber-600'; marker = 'bg-amber-400'; }
+
+        onSave({
+            date: new Date(date).toLocaleDateString('en-GB') + ', ' + time,
+            category: analysis.category,
+            text: rawText,
+            rawText: rawText,
+            legalSummary: analysis.legalSummary,
+            color: color,
+            marker: marker,
+            location: location,
+            tags: analysis.selectedTags,
+            attachments: attachedFiles
+        });
+
+        // Reset
+        setStep(1);
+        setRawText('');
+        setAnalysis(null);
+        setAttachedFiles([]);
     };
 
     return (

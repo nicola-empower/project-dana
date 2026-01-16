@@ -1,0 +1,3 @@
+﻿src/components/views/SecureView.tsx(163,53): error TS2304: Cannot find name 'ChevronRight'.
+src/components/views/SecureView.tsx(540,60): error TS2304: Cannot find name 'toggleTag'.
+src/components/views/SecureView.tsx(554,50): error TS2304: Cannot find name 'handleSave'.
