@@ -2,6 +2,8 @@
 
 > **"Hidden in Plain Sight"** - A dual-purpose application designed to protect domestic abuse survivors through plausible deniability and secure evidence logging.
 
+<img width="2824" height="1417" alt="image" src="https://github.com/user-attachments/assets/34d15f45-2091-44a3-8caf-af87677005da" />
+
 ---
 
 ## 🚨 The Problem
